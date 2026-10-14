@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Күн жүйесі бойынша ұшу</title>
+<style>
+:root{--bg:#04060f;--text:#eaf0ff;--muted:#9fb0e0;--accent:#7cc4ff;--accent2:#c08cff;--card:rgba(18,26,56,.62);--border:rgba(140,170,255,.22);
+color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#04060f;--text:#eaf0ff;--muted:#9fb0e0;--accent:#7cc4ff;--accent2:#c08cff;--card:rgba(18,26,56,.62);--border:rgba(140,170,255,.22)}}
+:root[data-theme="dark"]{--bg:#04060f;--text:#eaf0ff;--muted:#9fb0e0;--accent:#7cc4ff;--accent2:#c08cff;--card:rgba(18,26,56,.62);--border:rgba(140,170,255,.22)}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.neb{position:fixed;inset:-20%;z-index:0;pointer-events:none;background:radial-gradient(40% 30% at 20% 30%,rgba(120,60,200,.25),transparent 70%),radial-gradient(35% 28% at 80% 65%,rgba(40,110,220,.22),transparent 70%);will-change:transform}
+main{position:relative;z-index:1}
+section{max-width:1000px;margin:0 auto;padding:70px 18px}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.astro{font-size:84px;animation:float 6s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(124,196,255,.5))}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-22px) rotate(8deg)}}
+h1{font-size:clamp(32px,7vw,64px);line-height:1.1;margin:14px 0 10px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);max-width:560px;margin:0 auto 26px}
+.btn{display:inline-block;padding:13px 28px;border-radius:999px;color:#04060f;font-weight:700;text-decoration:none;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 30px rgba(124,196,255,.4)}
+.hint{position:absolute;bottom:22px;color:var(--muted);font-size:13px;animation:float 3s infinite}
+h2{font-size:clamp(24px,4vw,36px);margin:0 0 8px}
+.lead{color:var(--muted);margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.stage{padding:8px;overflow:hidden}
+#sys{width:100%;height:520px;display:block;touch-action:pan-y;cursor:pointer}
+.info{display:flex;gap:14px;align-items:center;padding:14px 18px;margin-top:14px;flex-wrap:wrap}
+.dot{width:46px;height:46px;border-radius:50%;flex:none}
+.info b{font-size:20px}.info span{color:var(--muted);font-size:15px}
+.ctrl{display:flex;gap:8px;margin-left:auto}
+.pill{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:999px;padding:8px 16px;cursor:pointer;font:inherit;font-size:14px}
+.pill.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04060f;border-color:transparent;font-weight:700}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chart{padding:20px}
+.row{display:grid;grid-template-columns:86px 1fr 96px;gap:10px;align-items:center;margin:10px 0;font-size:15px}
+.track{height:20px;border-radius:10px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar{height:100%;width:0;border-radius:10px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.val{color:var(--muted);text-align:right;font-size:14px}
+.note{color:var(--muted);font-size:13px;margin-top:12px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.fact{padding:20px}.fact i{font-style:normal;font-size:34px}.fact h3{margin:8px 0 4px;font-size:18px}.fact p{margin:0;color:var(--muted);font-size:15px}
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s}.rv.in{opacity:1;transform:none}
+.vw{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(2,4,12,.84);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:14px}
+.vw.open{display:flex;animation:fadeIn .35s}
+.vbox{position:relative;width:min(920px,100%);max-height:92vh;overflow:auto;padding:20px;background:rgba(10,16,38,.92)}
+.vw.open .vbox{animation:zoomIn .7s cubic-bezier(.12,1,.3,1)}
+@keyframes zoomIn{from{transform:scale(.06);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.vx{position:absolute;top:10px;right:12px;width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text);font-size:18px;cursor:pointer;z-index:2}
+.vgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center}
+#vc{width:100%;height:auto;aspect-ratio:1;display:block;cursor:grab;touch-action:none}
+.vcap{text-align:center;color:var(--muted);font-size:12px}
+.vinfo h3{font-size:30px;margin:0 0 6px}.vinfo p{color:var(--muted);margin:0 0 8px;font-size:15px}
+dl{margin:8px 0 0}dl div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--border);font-size:15px}
+dt{color:var(--muted)}dd{margin:0;text-align:right}
+.cmp{display:flex;align-items:flex-end;gap:22px;margin-top:16px;font-size:12px;color:var(--muted);text-align:center}
+.cmp i{display:block;border-radius:50%;margin:0 auto 4px}
+@media(max-width:700px){.vgrid{grid-template-columns:1fr}.vinfo h3{font-size:26px}}
+@media(prefers-reduced-motion:reduce){.vw.open,.vw.open .vbox{animation:none}}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;width:60px;height:60px;border-radius:50%;border:0;cursor:pointer;font-size:28px;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 28px rgba(124,196,255,.55);animation:float 4s ease-in-out infinite}
+.chatp{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:60;width:min(400px,calc(100vw - 32px));height:min(560px,calc(100vh - 130px));display:none;flex-direction:column;overflow:hidden;background:rgba(10,16,38,.96)}
+.chatp.open{display:flex;animation:fadeIn .25s}
+.ch{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}.ch b{flex:1}.ch small{color:var(--muted)}
+#cm{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:90%;padding:9px 13px;border-radius:14px;font-size:15px;line-height:1.5;border:1px solid var(--border);overflow-wrap:anywhere}
+.m.b{background:rgba(255,255,255,.06);align-self:flex-start}.m.u{background:rgba(124,196,255,.2);align-self:flex-end}
+.m p{margin:0 0 6px}.m p:last-child{margin:0}.m ul{margin:4px 0 6px;padding-left:18px}
+.cs{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
+.cs button{background:transparent;color:var(--accent);border:1px solid var(--border);border-radius:999px;padding:6px 11px;font:inherit;font-size:13px;cursor:pointer}
+.cf{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+#ci{flex:1;resize:none;background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:9px 12px;font:inherit;font-size:15px;max-height:90px}
+#cg{border:0;border-radius:12px;padding:0 16px;font:inherit;font-weight:700;cursor:pointer;color:#04060f;background:linear-gradient(135deg,var(--accent),var(--accent2))}#cg:disabled{opacity:.5}
+@media(max-width:560px){.chatp{right:8px;left:8px;width:auto}}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:30px 18px 50px}
+@media(max-width:560px){#sys{height:440px}.row{grid-template-columns:70px 1fr 78px;font-size:13px}.ctrl{margin-left:0}}
+@media(prefers-reduced-motion:reduce){.astro,.hint{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas><div class="neb" id="neb"></div>
+<main>
+<section class="hero">
+  <div class="astro">🧑‍🚀</div>
+  <h1>Ашық ғарышқа<br>қош келдіңіз</h1>
+  <p class="sub">Жұлдыздар арасымен ұш, планеталардың орбиталарын зертте және әлемдерді тірі графиктерде салыстыр.</p>
+  <a class="btn" href="#system">Ұшуды бастау 🚀</a>
+  <div class="hint">төмен айналдыр ↓</div>
+</section>
+
+<section id="system" class="rv">
+  <h2>Қозғалыстағы Күн жүйесі</h2>
+  <p class="lead">Планета туралы білу үшін оны бас. Қашықтықтар сығылған (логарифмдік шкала), әйтпесе Нептун экраннан тыс кетер еді.</p>
+  <div class="card stage"><canvas id="sys"></canvas></div>
+  <div class="card info" id="info">
+    <div class="dot" id="idot"></div>
+    <div><b id="iname"></b><br><span id="itext"></span></div>
+    <div class="ctrl"><button class="pill on" id="zoomBtn">🔍 Жақыннан</button><button class="pill" id="pause">⏸ Тоқтату</button><button class="pill" id="fast">⏩ Жылдамдату</button></div>
+  </div>
+</section>
+
+<section id="charts" class="rv">
+  <h2>Планеталарды салыстыр</h2>
+  <p class="lead">Көрсеткішті таңда — бағандар қайта өседі.</p>
+  <div class="card chart">
+    <div class="tabs" id="tabs"></div>
+    <div id="bars"></div>
+    <div class="note" id="cnote"></div>
+  </div>
+</section>
+
+<section class="rv">
+  <h2>Білесің бе?</h2>
+  <p class="lead">Басты айналдыратын бірнеше дерек.</p>
+  <div class="facts">
+    <div class="card fact"><i>☀️</i><h3>Жарық кешігіп жетеді</h3><p>Күн жарығы Жерге шамамен 8 минутта жетеді, ал Нептунға 4 сағаттан астам уақытта.</p></div>
+    <div class="card fact"><i>🌋</i><h3>Меркурийден ыстығырақ</h3><p>Шолпан Меркурийден ыстығырақ: CO₂-ден тұратын тығыз атмосфера күшті парниктік әсер тудырады.</p></div>
+    <div class="card fact"><i>🪐</i><h3>Жүзетін Сатурн</h3><p>Сатурнның орташа тығыздығы судан аз: жеткілікті үлкен мұхит болса, ол суға батпай, жүзіп жүрер еді.</p></div>
+  </div>
+</section>
+<div class="vw" id="vw" aria-hidden="true"><div class="vbox card" id="vbox" role="dialog" aria-modal="true" aria-labelledby="vt">
+<button class="vx" id="vclose" aria-label="Жабу">✕</button>
+<div class="vgrid"><div><canvas id="vc" width="520" height="520"></canvas><div class="vcap">Айналдыру үшін сүйре · көркемдік реконструкция</div></div>
+<div class="vinfo"><h3 id="vt"></h3><p id="vd"></p><dl id="vl"></dl><div class="cmp" id="vcmp"></div><button class="pill on" id="vask" style="margin-top:16px">🤖 Гидтен сұра</button></div></div></div></div>
+<button class="fab" id="fab" aria-label="ЖИ-көмекші">🤖</button>
+<div class="chatp card" id="chatp" role="dialog" aria-label="Жұлдызды гид">
+<div class="ch"><span>🪐</span><b>Жұлдызды гид<br><small>ғарыш бойынша ЖИ-көмекші</small></b><button class="vx" style="position:static" id="cx" aria-label="Жабу">✕</button></div>
+<div id="cm"></div><div class="cs" id="cs"></div>
+<form class="cf" id="cf"><textarea id="ci" rows="1" placeholder="Ғарыш туралы сұра…" aria-label="Сұрағың"></textarea><button id="cg" type="submit">Сұрау</button></form>
+</div>
+<footer>Деректер дөңгелектелген, танысу үшін берілген · Жұлдыздар кодпен салынған ✨</footer>
+</main>
+
+<script>
+/* ---------- данные ---------- */
+const P=[
+{n:'Меркурий',c:'#b5a69a',a:0.39,d:4879,t:167,p:88,x:'Күнге ең жақын және ең жылдам планета: жылы бар болғаны 88 жер тәулігіне созылады.'},
+{n:'Шолпан',c:'#e8c27a',a:0.72,d:12104,t:464,p:225,x:'Ең ыстық планета. Кері бағытта айналады — Күн батыстан шығады.'},
+{n:'Жер',c:'#4aa3ff',a:1,d:12756,t:15,p:365,x:'Біздің үйіміз және бетінде тіршілік пен сұйық су бар жалғыз белгілі планета.'},
+{n:'Марс',c:'#e0623a',a:1.52,d:6792,t:-65,p:687,x:'Күн жүйесіндегі ең биік жанартау — Олимп тауы бар қызыл планета.'},
+{n:'Юпитер',c:'#d9a66c',a:5.2,d:142984,t:-110,p:4333,x:'Ең үлкен планета: Үлкен қызыл дақ — жүздеген жыл бойы тоқтамай соғып тұрған дауыл.'},
+{n:'Сатурн',c:'#ead7a0',a:9.58,d:120536,t:-140,p:10759,x:'Мұз бен тастан тұратын, жүздеген мың шақырымға созылған сақиналарымен әйгілі.',ring:1},
+{n:'Уран',c:'#8ee3e8',a:19.2,d:51118,t:-195,p:30687,x:'Бүйірімен «жатқан» мұзды алып: осінің еңкеюі шамамен 98°.'},
+{n:'Нептун',c:'#4f6dff',a:30.05,d:49528,t:-200,p:60190,x:'Ең алыс планета, ең күшті желдері бар — сағатына 2000 км-ге дейін.'}
+];
+const fmtN=v=>v.toLocaleString('ru-RU');
+
+/* ---------- звёздное небо ---------- */
+const sky=document.getElementById('sky'),sc=sky.getContext('2d'),neb=document.getElementById('neb');
+let W,H,stars=[],shoot=null,mx=0,my=0,DPR=Math.min(devicePixelRatio||1,2);
+function sizeSky(){W=innerWidth;H=innerHeight;sky.width=W*DPR;sky.height=H*DPR;sc.setTransform(DPR,0,0,DPR,0,0);
+ stars=Array.from({length:Math.round(W*H/5500)},()=>({x:Math.random()*W,y:Math.random()*H,z:.2+Math.random()*.8,t:Math.random()*6}))}
+addEventListener('resize',sizeSky);sizeSky();
+addEventListener('pointermove',e=>{mx=e.clientX/W-.5;my=e.clientY/H-.5});
+function drawSky(ts){
+ sc.clearRect(0,0,W,H);const sy=scrollY;
+ for(const s of stars){
+  const y=((s.y-sy*s.z*.35-my*s.z*16)%H+H)%H,x=((s.x-mx*s.z*26)%W+W)%W;
+  const a=.45+.55*Math.sin(ts/700*s.z+s.t);
+  sc.fillStyle=`rgba(${s.z>.8?'190,215,255':'255,245,230'},${a*s.z})`;
+  sc.beginPath();sc.arc(x,y,s.z*1.5,0,6.283);sc.fill();
+ }
+ if(!shoot&&Math.random()<.004)shoot={x:Math.random()*W,y:Math.random()*H*.5,l:0};
+ if(shoot){shoot.l+=12;const g=sc.createLinearGradient(shoot.x,shoot.y,shoot.x-shoot.l,shoot.y-shoot.l*.5);
+  g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(1,'rgba(255,255,255,0)');
+  sc.strokeStyle=g;sc.lineWidth=2;sc.beginPath();sc.moveTo(shoot.x,shoot.y);sc.lineTo(shoot.x-Math.min(shoot.l,120),shoot.y-Math.min(shoot.l,120)*.5);sc.stroke();
+  shoot.x+=12;shoot.y+=6;if(shoot.l>260)shoot=null}
+ neb.style.transform=`translate(${mx*-30}px,${-sy*.08+my*-20}px)`;
+ requestAnimationFrame(drawSky)}
+requestAnimationFrame(drawSky);
+
+/* ---------- модель Солнечной системы ---------- */
+const cv=document.getElementById('sys'),cx=cv.getContext('2d');
+let cw,ch,sel=2,paused=false,speed=1,time=0,last=0;
+P.forEach((p,i)=>p.ang=i*1.7);
+function sizeSys(){const r=cv.getBoundingClientRect();cw=r.width;ch=r.height;cv.width=cw*DPR;cv.height=ch*DPR;cx.setTransform(DPR,0,0,DPR,0,0)}
+addEventListener('resize',sizeSys);sizeSys();
+const rOrb=a=>{const m=Math.min(cw/2,ch/2)-16,r0=46;return r0+(m-r0)*Math.log(a/.39)/Math.log(30.05/.39)};
+const rPl=d=>3+9*Math.sqrt(d/142984);
+function pos(p){const r=rOrb(p.a);return[cw/2+Math.cos(p.ang)*r,ch/2+Math.sin(p.ang)*r*.82]}
+function drawSys(ts){
+ const dt=Math.min((ts-last)/1000,.05);last=ts;
+ if(!paused)P.forEach(p=>p.ang+=dt*speed*.55/Math.pow(p.p/88,.7));
+ cx.clearRect(0,0,cw,ch);
+ P.forEach((p,i)=>{cx.beginPath();cx.ellipse(cw/2,ch/2,rOrb(p.a),rOrb(p.a)*.82,0,0,6.283);
+  cx.strokeStyle=i===sel?'rgba(124,196,255,.55)':'rgba(150,170,230,.16)';cx.lineWidth=i===sel?1.6:1;cx.stroke()});
+ const pulse=1+.04*Math.sin(ts/400),g=cx.createRadialGradient(cw/2,ch/2,2,cw/2,ch/2,48*pulse);
+ g.addColorStop(0,'#fff6c8');g.addColorStop(.25,'#ffcf4a');g.addColorStop(.6,'rgba(255,140,30,.35)');g.addColorStop(1,'rgba(255,100,0,0)');
+ cx.fillStyle=g;cx.beginPath();cx.arc(cw/2,ch/2,48*pulse,0,6.283);cx.fill();
+ P.forEach((p,i)=>{const[x,y]=pos(p),r=rPl(p.d)*(1+.7*(p.g=(p.g||0)+((i===sel?1:0)-(p.g||0))*.12));
+  if(i===sel){cx.beginPath();cx.arc(x,y,r+7,0,6.283);cx.strokeStyle='rgba(255,255,255,.7)';cx.setLineDash([3,4]);cx.stroke();cx.setLineDash([])}
+  const gr=cx.createRadialGradient(x-r*.4,y-r*.4,r*.1,x,y,r);gr.addColorStop(0,'#fff');gr.addColorStop(.25,p.c);gr.addColorStop(1,'#0a0f24');
+  if(p.ring){cx.save();cx.translate(x,y);cx.rotate(-.4);cx.beginPath();cx.ellipse(0,0,r*2,r*.6,0,0,6.283);cx.strokeStyle='rgba(234,215,160,.8)';cx.lineWidth=2.5;cx.stroke();cx.restore()}
+  cx.fillStyle=gr;cx.beginPath();cx.arc(x,y,r,0,6.283);cx.fill();
+  cx.fillStyle='rgba(234,240,255,.85)';cx.font='12px system-ui,sans-serif';cx.textAlign='center';cx.fillText(p.n,x,y+r+15)});
+ requestAnimationFrame(drawSys)}
+requestAnimationFrame(drawSys);
+function setSel(i){sel=i;const p=P[i];document.getElementById('iname').textContent=p.n;
+ document.getElementById('idot').style.background=`radial-gradient(circle at 30% 30%,#fff,${p.c} 40%,#0a0f24)`;
+ document.getElementById('itext').textContent=`${p.x} Диаметрі ${fmtN(p.d)} км, жылы — ${fmtN(p.p)} тәулік, Күннен ${p.a} а.б. қашықтықта.`}
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;let best=-1,bd=1e9;
+ P.forEach((p,i)=>{const[px,py]=pos(p),d=Math.hypot(px-x,py-y);if(d<bd){bd=d;best=i}});if(bd<32){setSel(best);openViewer(best,e.clientX,e.clientY)}});
+document.getElementById('pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'▶ Бастау':'⏸ Тоқтату'};
+document.getElementById('fast').onclick=e=>{speed=speed===1?4:1;e.target.textContent=speed===1?'⏩ Жылдамдату':'⏪ Қалыпты'};
+setSel(2);
+
+/* ---------- графики ---------- */
+const M=[
+{k:'Өлшемі',f:p=>p.d/142984,v:p=>fmtN(p.d)+' км',c:p=>p.c,note:'Диаметрі Юпитерге қатысты. Жер оның енінің бар болғаны 9%-ы.'},
+{k:'Температура',f:p=>(p.t+200)/664,v:p=>p.t+' °C',c:p=>p.t>100?'#ff7a45':p.t>-20?'#ffd24a':'#5ab4ff',note:'Бетіндегі орташа температура (газ алыптары үшін — бұлттар деңгейінде).'},
+{k:'Қашықтық',f:p=>(Math.log10(p.a)+.5)/1.98,v:p=>p.a+' а.б.',c:()=>'#9c8cff',note:'Күннен астрономиялық бірлікпен (1 а.б. = Жерге дейінгі қашықтық). Шкала логарифмдік.'},
+{k:'Жыл ұзақтығы',f:p=>(Math.log10(p.p)-1)/3.8,v:p=>fmtN(p.p)+' тәул.',c:()=>'#4be0b0',note:'Күнді толық айналу уақыты жер тәулігімен. Шкала логарифмдік.'}
+];
+const tabs=document.getElementById('tabs'),bars=document.getElementById('bars');
+function show(i){
+ [...tabs.children].forEach((b,j)=>b.classList.toggle('on',i===j));
+ bars.innerHTML=P.map(p=>`<div class="row"><span>${p.n}</span><div class="track"><div class="bar" style="background:${M[i].c(p)};box-shadow:0 0 14px ${M[i].c(p)}88"></div></div><span class="val">${M[i].v(p)}</span></div>`).join('');
+ document.getElementById('cnote').textContent=M[i].note;
+ requestAnimationFrame(()=>requestAnimationFrame(()=>[...bars.querySelectorAll('.bar')].forEach((b,j)=>b.style.width=Math.max(M[i].f(P[j])*100,2)+'%')))}
+M.forEach((m,i)=>{const b=document.createElement('button');b.className='pill';b.textContent=m.k;b.onclick=()=>show(i);tabs.appendChild(b)});
+show(0);
+
+/* ---------- появление блоков ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');if(e.target.id==='charts')show(0)}}),{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+/* ---------- вид вблизи ---------- */
+const clamp=(t,a=0,b=1)=>Math.max(a,Math.min(b,t));
+const mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];
+const dang=(a,b)=>{let d=a-b;while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;return d};
+function hs(x,y,z){let h=(Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(z,1274126177))|0;h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967295}
+function vn(x,y,z){const xi=Math.floor(x),yi=Math.floor(y),zi=Math.floor(z),s=t=>t*t*(3-2*t),u=s(x-xi),v=s(y-yi),w=s(z-zi),l=(a,b,t)=>a+(b-a)*t;
+ return l(l(l(hs(xi,yi,zi),hs(xi+1,yi,zi),u),l(hs(xi,yi+1,zi),hs(xi+1,yi+1,zi),u),v),l(l(hs(xi,yi,zi+1),hs(xi+1,yi,zi+1),u),l(hs(xi,yi+1,zi+1),hs(xi+1,yi+1,zi+1),u),v),w)}
+function fbm(x,y,z,o=5){let a=.5,s=0,f=1;for(let i=0;i<o;i++){s+=a*vn(x*f,y*f,z*f);f*=2;a*=.5}return s}
+const TX=[
+(x,y,z)=>{const n=fbm(x*4,y*4,z*4,6),c=Math.abs(vn(x*11,y*11,z*11)-.5),k=mix([88,84,80],[176,170,160],n);return c<.05?mix(k,[56,54,52],.5):k},
+(x,y,z)=>mix([196,152,86],[247,228,176],fbm(x*2+fbm(y*3,z*3,x*3,3)*1.6,y*3.5,z*2,5)),
+(x,y,z)=>{const h=fbm(x*2.2+3,y*2.2,z*2.2,6);let k;
+ if(h>.52){const des=clamp(fbm(x*3,y*3,z*3+7,4)*2-.5)*clamp(1-Math.abs(Math.abs(y)-.35)*4);k=mix(mix([46,112,48],[130,128,70],clamp((h-.52)*5)),[200,172,108],des)}
+ else k=mix([6,26,84],[30,92,172],clamp(h*1.7));
+ if(Math.abs(y)>.86+fbm(x*6,y*6,z*6,3)*.08)k=[240,246,255];
+ return mix(k,[255,255,255],clamp((fbm(x*3+9,y*5,z*3,5)-.48)*3.2)*.88)},
+(x,y,z)=>{const n=fbm(x*3,y*3,z*3,6),d=fbm(x*2+5,y*2,z*2,4);let k=mix([118,52,32],[206,116,64],n);if(d>.54)k=mix(k,[66,40,36],clamp((d-.54)*3.5));if(Math.abs(y)>.9)k=mix(k,[240,236,232],clamp((Math.abs(y)-.9)*12));return k},
+(x,y,z,lon)=>{const t=(Math.sin(y*15+fbm(x*2,y*6,z*2,4)*2.6)+1)/2;let k=mix(mix([176,112,72],[244,226,196],t),[140,84,56],fbm(x*6,y*16,z*6,4)*.4);const ex=dang(lon,1)/.3,ey=(y+.3)/.1,q=ex*ex+ey*ey;if(q<1)k=mix(k,[190,68,44],(1-q)*.92);return k},
+(x,y,z)=>mix([196,166,108],[240,222,172],clamp((Math.sin(y*11+fbm(x*2,y*5,z*2,3)*1.4)+1)/2*.8+fbm(x*4,y*10,z*4,3)*.2)),
+(x,y,z)=>mix([140,208,220],[196,238,242],clamp((Math.sin(y*7)+1)/2*.45+fbm(x*3,y*8,z*3,3)*.35)),
+(x,y,z,lon)=>{const t=(Math.sin(y*9+fbm(x*2,y*5,z*2,3)*1.6)+1)/2;let k=mix([26,52,158],[74,116,232],t);const ex=dang(lon,.6)/.28,ey=(y+.32)/.12,q=ex*ex+ey*ey;if(q<1)k=mix(k,[12,24,90],(1-q)*.9);if(fbm(x*6,y*14,z*6,3)>.66&&Math.abs(y+.5)<.25)k=mix(k,[232,242,255],.5);return k}];
+const D=[
+{day:'59 жер тәулігі',g:'3,7 м/с²',m:'0,055',at:'дерлік жоқ',tilt:.03,rim:[0,0,0],ra:0},
+{day:'243 жер тәулігі (кері)',g:'8,9 м/с²',m:'0,82',at:'CO₂, күкірт қышқылы бұлттары',tilt:.05,rim:[255,205,120],ra:.9,retro:1},
+{day:'24 сағат',g:'9,8 м/с²',m:'1',at:'азот және оттек',tilt:.41,rim:[110,175,255],ra:1.1},
+{day:'24,6 сағат',g:'3,7 м/с²',m:'0,11',at:'сирек, CO₂',tilt:.44,rim:[255,170,120],ra:.35},
+{day:'9,9 сағат',g:'24,8 м/с²',m:'318',at:'сутек және гелий',tilt:.05,rim:[255,215,170],ra:.35},
+{day:'10,7 сағат',g:'10,4 м/с²',m:'95',at:'сутек және гелий',tilt:.47,rim:[255,235,190],ra:.35,ring:1},
+{day:'17,2 сағат (кері)',g:'8,9 м/с²',m:'14,5',at:'сутек, гелий, метан',tilt:1.7,rim:[170,240,250],ra:.6,retro:1},
+{day:'16,1 сағат',g:'11,2 м/с²',m:'17',at:'сутек, гелий, метан',tilt:.5,rim:[120,150,255],ra:.6}];
+const tex={},vw=document.getElementById('vw'),vbox=document.getElementById('vbox'),vc=document.getElementById('vc'),vx=vc.getContext('2d');
+const S=320,off=document.createElement('canvas');off.width=off.height=S;const ox=off.getContext('2d'),img=ox.createImageData(S,S);
+let vi=0,vrot=0,vOpen=false,vdrag=false,vlx=0,vlt=0;
+function genTex(i){if(tex[i])return;const w=384,h=192,a=new Uint8ClampedArray(w*h*4);
+ for(let j=0;j<h;j++){const lat=Math.PI*(.5-(j+.5)/h),y=Math.sin(lat),cl=Math.cos(lat);
+  for(let u=0;u<w;u++){const lon=(u+.5)/w*6.2832,k=TX[i](cl*Math.sin(lon),y,cl*Math.cos(lon),lon),o=(j*w+u)*4;a[o]=k[0];a[o+1]=k[1];a[o+2]=k[2];a[o+3]=255}}
+ tex[i]=a}
+function renderSphere(){
+ const d=D[vi],T=tex[vi],tw=384,th=192,px=img.data,ct=Math.cos(d.tilt),st=Math.sin(d.tilt),rm=d.rim;
+ for(let j=0;j<S;j++){const y0=(j+.5)/S*2-1;
+  for(let i=0;i<S;i++){const x0=(i+.5)/S*2-1,r2=x0*x0+y0*y0,o=(j*S+i)*4;
+   if(r2>=1){px[o+3]=0;continue}
+   const z=Math.sqrt(1-r2),dif=Math.max(0,-.55*x0-.35*y0+.76*z),xt=x0*ct+y0*st,yt=-x0*st+y0*ct,
+   lon=Math.atan2(xt,z)+vrot,lat=Math.asin(clamp(-yt,-1,1)),
+   uu=((lon/6.2832)%1+1)%1,tx=Math.min(tw-1,(uu*tw)|0),ty=Math.min(th-1,((.5-lat/Math.PI)*th)|0),
+   ti=(ty*tw+tx)*4,sh=.05+.95*Math.pow(dif,.8),rim=Math.pow(1-z,3)*d.ra*(.25+dif);
+   px[o]=Math.min(255,T[ti]*sh+rm[0]*rim);px[o+1]=Math.min(255,T[ti+1]*sh+rm[1]*rim);px[o+2]=Math.min(255,T[ti+2]*sh+rm[2]*rim);
+   px[o+3]=255*Math.min(1,(1-r2)*40)}}
+ ox.putImageData(img,0,0)}
+function ringHalf(R,a0,a1){for(let k=0;k<30;k++){const rr=1.3+k*.03*1.0;if(rr>1.92&&rr<2.0)continue;
+ vx.strokeStyle=`rgba(${215+k%5*4},${190+k%4*5},${140+k%3*6},${.3+.4*vn(k*1.7,3,1)})`;vx.lineWidth=R*.036;
+ vx.beginPath();vx.ellipse(0,0,R*rr,R*rr*.28,0,a0,a1);vx.stroke()}}
+function vloop(ts){if(!vOpen)return;const dt=Math.min((ts-vlt)/1000,.05);vlt=ts;const d=D[vi];
+ if(!vdrag)vrot+=dt*.22*(d.retro?-1:1);
+ renderSphere();const W2=vc.width,R=d.ring?96:170;
+ vx.clearRect(0,0,W2,W2);
+ if(d.ring){vx.save();vx.translate(W2/2,W2/2);vx.rotate(d.tilt);ringHalf(R,Math.PI,6.2832);vx.restore()}
+ vx.drawImage(off,W2/2-R,W2/2-R,R*2,R*2);
+ if(d.ring){vx.save();vx.translate(W2/2,W2/2);vx.rotate(d.tilt);ringHalf(R,0,Math.PI);vx.restore()}
+ requestAnimationFrame(vloop)}
+function openViewer(i,px,py){
+ genTex(i);vi=i;const p=P[i],d=D[i],r=p.d/12756,f=n=>n.toFixed(2).replace('.',',');
+ document.getElementById('vt').textContent=p.n;document.getElementById('vd').textContent=p.x;
+ document.getElementById('vl').innerHTML=[['Диаметрі',fmtN(p.d)+' км'],['Жерге қатынасы',f(r)+' Жер диаметрі'],['Массасы',d.m+' Жер массасы'],['Ауырлық күші',d.g],['Тәулік',d.day],['Атмосфера',d.at],['Температура',p.t+' °C']].map(a=>`<div><dt>${a[0]}</dt><dd>${a[1]}</dd></div>`).join('');
+ const big=Math.max(p.d,12756),sz=p.d/big*110,ez=12756/big*110,bg=c=>`radial-gradient(circle at 30% 30%,#fff,${c} 40%,#0a0f24)`;
+ document.getElementById('vcmp').innerHTML=i===2?`<div><i style="width:110px;height:110px;background:${bg(P[2].c)}"></i>Жер</div>`:`<div><i style="width:${ez}px;height:${ez}px;background:${bg(P[2].c)}"></i>Жер</div><div><i style="width:${sz}px;height:${sz}px;background:${bg(p.c)}"></i>${p.n}</div>`;
+ vw.classList.add('open');vw.setAttribute('aria-hidden','false');
+ vbox.style.transformOrigin=(px-vbox.offsetLeft)+'px '+(py-vbox.offsetTop)+'px';
+ document.body.style.overflow='hidden';vOpen=true;vlt=performance.now();requestAnimationFrame(vloop);document.getElementById('vclose').focus()}
+function closeViewer(){vOpen=false;vw.classList.remove('open');vw.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+document.getElementById('vclose').onclick=closeViewer;
+vw.addEventListener('pointerdown',e=>{if(e.target===vw)closeViewer()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&vOpen)closeViewer()});
+vc.addEventListener('pointerdown',e=>{vdrag=true;vlx=e.clientX;vc.setPointerCapture(e.pointerId);vc.style.cursor='grabbing'});
+vc.addEventListener('pointermove',e=>{if(vdrag){vrot-=(e.clientX-vlx)*.012;vlx=e.clientX}});
+vc.addEventListener('pointerup',()=>{vdrag=false;vc.style.cursor='grab'});
+document.getElementById('zoomBtn').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();openViewer(sel,r.left+r.width/2,r.top)};
+
+/* ---------- ЖИ-көмекші ---------- */
+const CSYS=`Сен — «Жұлдызды гид», ғарыш пен астрономия бойынша достық ЖИ-көмекшісің. Түсіндіруді қарапайым тілмен, ұқсастықтармен жаса: қара құрдымдар, экзопланеталар, жұлдыздар, Әлем, ғарышты игеру тарихы, миссиялар, аспанды бақылау. Пайдаланушы қай тілде жазса, сол тілде жауап бер (әдепкі — қазақша). Қысқа жауап бер (шамамен 120 сөзге дейін, егер егжей-тегжейлі сұрамаса). Сенімді болмасаң немесе дерек ескіруі мүмкін болса (ұшырулар, жаңа жаңалықтар) — ашық айт. Ғылымды болжамнан ажырат. Ғарыштан тыс тақырыптарды сыпайы түрде ғарышқа қайтар. Пішім: қысқа абзацтар, қажет болса маркерлі тізім, маңызды терминдерді **қою** шрифтпен белгіле. Күрделі жауаптың соңында келесі не талқылауға болатынын ұсын.`;
+const CSG=['Қара құрдым қалай пайда болады?','Басқа планеталарда тіршілік бар ма?','Байқоңыр мен Гагариннің ұшуы туралы айтшы','Сатурнның сақиналары неге бар?','Бүгін түнде аспаннан не көруге болады?'];
+const cm=document.getElementById('cm'),ci=document.getElementById('ci'),cg=document.getElementById('cg'),cs=document.getElementById('cs'),chp=document.getElementById('chatp');
+let chist=[],cbusy=false,smp=null;
+const cesc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function cfmt(t){let o='',list=false,pa=[];const fl=()=>{if(pa.length){o+='<p>'+pa.join('<br>')+'</p>';pa=[]}};
+ for(const l of cesc(t).split('\n')){const m=l.match(/^\s*[-*•]\s+(.*)/);
+  if(m){fl();if(!list){o+='<ul>';list=true}o+='<li>'+m[1]+'</li>'}
+  else{if(list){o+='</ul>';list=false}if(l.trim()==='')fl();else pa.push(l)}}
+ fl();if(list)o+='</ul>';return o.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}
+function cadd(k,t){const d=document.createElement('div');d.className='m '+k;d.innerHTML=cfmt(t);cm.appendChild(d);cm.scrollTop=cm.scrollHeight;return d}
+cadd('b','Сәлем! Мен **Жұлдызды гид** 🚀 Планеталар, жұлдыздар, қара құрдымдар және ғарыш миссиялары туралы айтып беремін. Сұрағыңды жаз немесе төменнен таңда.');
+CSG.forEach(t=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.onclick=()=>cask(t);cs.appendChild(b)});
+function cToggle(v){const o=v===undefined?!chp.classList.contains('open'):v;chp.classList.toggle('open',o);document.getElementById('fab').textContent=o?'✕':'🤖';if(o)ci.focus()}
+async function cask(t){t=t.trim();if(!t||cbusy)return;cToggle(true);cbusy=true;cg.disabled=true;cs.style.display='none';ci.value='';ci.style.height='auto';
+ cadd('u',t);chist.push({role:'user',content:t});const bub=cadd('b','Жұлдыздарға қарап тұрмын…');
+ try{if(!smp)smp=await claude.use('sample');if(!smp)throw{code:'unavailable'};
+  const ms=chist.slice(-11).map(m=>({...m}));
+  ms[0].content=CSYS+'\nҚазір пайдаланушы сайтта «'+P[sel].n+'» планетасын қарап отыр.\n\n'+ms[0].content;
+  const r=await smp(ms,{cache:false,onText:({text})=>{bub.innerHTML=cfmt(text);cm.scrollTop=cm.scrollHeight}});
+  bub.innerHTML=cfmt(r.text);chist.push({role:'assistant',content:r.text})
+ }catch(e){chist.pop();const c=e&&e.code;bub.textContent=c==='rate_limited'?'Сұраныс тым көп. Сәл күтіп, қайта көріңіз.':(c==='not_granted'||c==='unavailable')?'Бетке Claude-ке қол жеткізуге рұқсат беру керек (немесе оны claude.ai-да ашыңыз).':'Жауап алу мүмкін болмады. Қайта көріңіз.'}
+ cbusy=false;cg.disabled=false;ci.focus()}
+document.getElementById('fab').onclick=()=>cToggle();
+document.getElementById('cx').onclick=()=>cToggle(false);
+document.getElementById('cf').addEventListener('submit',e=>{e.preventDefault();cask(ci.value)});
+ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();cask(ci.value)}});
+ci.addEventListener('input',()=>{ci.style.height='auto';ci.style.height=Math.min(ci.scrollHeight,90)+'px'});
+document.getElementById('vask').onclick=()=>cask(P[vi].n+' туралы ең қызықты фактілерді айтып бер');
+</script>
+</body>
+</html>
